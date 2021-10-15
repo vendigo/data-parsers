@@ -1,0 +1,32 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.5.20'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    exposedVersion = "0.32.1"
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+
+    implementation group: 'org.apache.commons', name: 'commons-csv', version: '1.8'
+
+    implementation group: 'org.jetbrains.exposed', name: 'exposed-core', version: exposedVersion
+    implementation group: 'org.jetbrains.exposed', name: 'exposed-dao', version: exposedVersion
+    implementation group: 'org.jetbrains.exposed', name: 'exposed-jdbc', version: exposedVersion
+    implementation group: 'org.jetbrains.exposed', name: 'exposed-java-time', version: exposedVersion
+    implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.22'
+
+    implementation platform("org.http4k:http4k-bom:4.9.9.0")
+    implementation "org.http4k:http4k-core"
+    implementation "org.http4k:http4k-server-netty"
+    implementation "org.http4k:http4k-client-apache"
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
+}
