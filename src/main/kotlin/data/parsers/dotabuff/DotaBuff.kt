@@ -18,37 +18,58 @@ import java.time.LocalDateTime
 
 const val ACC_ID = 253137085
 const val OLD_ADD_ID = 93642829
-const val MATCHES_URL = "https://www.dotabuff.com/players/${OLD_ADD_ID}/matches"
+const val MATCHES_URL = "https://www.dotabuff.com/players/${ACC_ID}/matches"
+const val LATEST_MATCH_ID = 298484292
 
 fun main() {
-    //val pageContent = loadPageFromResources()
-    //val result = parsePage(pageContent)
-    //result.forEach {
-    //    println(it)
+    loadPages(2 downTo 1)
+}
+
+private fun loadPages(range: IntProgression) {
+    Database.connect(
+        "jdbc:postgresql://localhost:5432/postgres",
+        driver = "org.postgresql.Driver", user = "postgres", password = "testpassword"
+    )
+
+    //transaction {
+        //SchemaUtils.drop(GameRecordsTable)
+        //SchemaUtils.create(GameRecordsTable)
     //}
 
-    val result = loadPages(7..28)
-    result.forEach {
-        println(it)
+    range.forEach {
+        val records = loadPage(it)
+        println(records)
+        saveRecordsToDb(records)
     }
-    //saveRecordsToDb(result)
 }
 
-private fun loadPages(range: IntRange): List<GameRecord> {
-    return range.map {
-        loadPageRetrying(it)
-    }.flatten()
+fun saveRecordsToDb(records: List<GameRecord>) {
+    transaction {
+        records.forEach {
+            GameRecordEntity.new {
+                matchId = it.matchId
+                hero = it.hero
+                result = it.result
+                ranked = it.ranked
+                soloQueue = it.soloQueue
+                duration = it.duration
+                kills = it.kills
+                deaths = it.deaths
+                assists = it.assists
+                date = it.date
+            }
+        }
+    }
 }
 
-private fun loadPageRetrying(pageNumber: Int): List<GameRecord> {
-    var gameRecords: List<GameRecord>
-
-    do {
-        val pageContent = loadPageContent(pageNumber)
-        gameRecords = parsePage(pageContent)
-        println("Loaded page $pageNumber - ${gameRecords.size} records")
-    } while (gameRecords.isEmpty())
-
+private fun loadPage(pageNumber: Int): List<GameRecord> {
+    val gameRecords: List<GameRecord>
+    val pageContent = loadPageContent(pageNumber)
+    gameRecords = parsePage(pageContent)
+    println("Loaded page $pageNumber - ${gameRecords.size} records")
+    if (gameRecords.isEmpty()) {
+        throw RuntimeException("Enable to load page: $pageNumber")
+    }
     return gameRecords
 }
 
@@ -60,6 +81,7 @@ private fun parsePage(pageContent: String): List<GameRecord> {
             index > 0
         }
         .map { parseLine(it) }
+        .filter { it.matchId > LATEST_MATCH_ID }
 }
 
 private fun parseLine(row: Element): GameRecord {
@@ -106,33 +128,6 @@ data class GameRecord(
     val kills: Int, val deaths: Int, val assists: Int,
     val date: LocalDateTime
 )
-
-fun saveRecordsToDb(records: List<GameRecord>) {
-    println("About to save ${records.size} records to db")
-    Database.connect(
-        "jdbc:postgresql://localhost:5432/postgres",
-        driver = "org.postgresql.Driver", user = "postgres", password = "testpassword"
-    )
-    transaction {
-        SchemaUtils.drop(GameRecordsTable)
-        SchemaUtils.create(GameRecordsTable)
-
-        records.forEach {
-            GameRecordEntity.new {
-                matchId = it.matchId
-                hero = it.hero
-                result = it.result
-                ranked = it.ranked
-                soloQueue = it.soloQueue
-                duration = it.duration
-                kills = it.kills
-                deaths = it.deaths
-                assists = it.assists
-                date = it.date
-            }
-        }
-    }
-}
 
 class GameRecordEntity(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<GameRecordEntity>(GameRecordsTable)
