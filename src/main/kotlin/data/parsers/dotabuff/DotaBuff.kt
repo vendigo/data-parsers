@@ -19,10 +19,10 @@ import java.time.LocalDateTime
 const val ACC_ID = 253137085
 const val OLD_ADD_ID = 93642829
 const val MATCHES_URL = "https://www.dotabuff.com/players/${ACC_ID}/matches"
-const val LATEST_MATCH_ID = 298484292
+const val LATEST_MATCH_ID = 732793093
 
 fun main() {
-    loadPages(2 downTo 1)
+    loadPages(3 downTo 1)
 }
 
 private fun loadPages(range: IntProgression) {
