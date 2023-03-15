@@ -17,8 +17,8 @@ fun main() {
         listOf("bad", "vulg", "fname", "lname", "pname", "geo", "prop", "p", "slang", "ns", "abbr")
     )
     println("Found ${words.size} words")
-    //writeToFile(words)
-    //writeToDb(words)
+    writeToFile(words)
+    writeToDb(words)
 }
 
 private fun parseFile(
