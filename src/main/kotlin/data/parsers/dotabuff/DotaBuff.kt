@@ -20,9 +20,10 @@ const val ACC_ID = 253137085
 const val OLD_ADD_ID = 93642829
 const val MATCHES_URL = "https://www.dotabuff.com/players/${ACC_ID}/matches"
 const val LATEST_MATCH_ID = 972365325
+val LATEST_MATCH_DATE = LocalDateTime.of(2023, 1, 15, 21, 50, 0)
 
 fun main() {
-    loadPages(1 downTo 1)
+    loadPages(2 downTo 1)
 }
 
 private fun loadPages(range: IntProgression) {
@@ -81,7 +82,7 @@ private fun parsePage(pageContent: String): List<GameRecord> {
             index > 0
         }
         .map { parseLine(it) }
-        .filter { it.matchId > LATEST_MATCH_ID }
+        .filter { it.date > LATEST_MATCH_DATE }
 }
 
 private fun parseLine(row: Element): GameRecord {
